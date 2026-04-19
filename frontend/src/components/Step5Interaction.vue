@@ -695,9 +695,11 @@ const sendToReportAgent = async (message) => {
   })
 
   if (res.success && res.data) {
+    const raw = res.data.response
+    const text = typeof raw === 'object' && raw !== null ? (raw.response || JSON.stringify(raw)) : (raw || res.data.answer || 'No response')
     chatHistory.value.push({
       role: 'assistant',
-      content: res.data.response || res.data.answer || 'No response',
+      content: text,
       timestamp: new Date().toISOString()
     })
     addLog('Report Agent replied')

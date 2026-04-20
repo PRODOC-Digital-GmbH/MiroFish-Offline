@@ -98,7 +98,7 @@ class EmbeddingService:
                 uncached_texts.append(text)
             else:
                 # Empty text — zero vector
-                results[i] = [0.0] * 768
+                results[i] = [0.0] * 1024
 
         # Batch-embed uncached texts
         if uncached_texts:

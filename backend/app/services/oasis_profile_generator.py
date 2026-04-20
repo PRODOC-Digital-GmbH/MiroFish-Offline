@@ -640,9 +640,9 @@ class OasisProfileGenerator:
         """Build detailed persona prompt for individual entities"""
 
         attrs_str = json.dumps(entity_attributes, ensure_ascii=False) if entity_attributes else "None"
-        context_str = context[:3000] if context else "No additional context"
+        context_str = context[:1500] if context else "No additional context"
 
-        return f"""Generate a detailed social media user persona for the entity, maximizing restoration of existing reality.
+        return f"""Generate a concise social media user persona for the entity.
 
 Entity Name: {entity_name}
 Entity Type: {entity_type}
@@ -654,15 +654,12 @@ Context Information:
 
 Please generate JSON containing the following fields:
 
-1. bio: Social media bio, 200 characters
-2. persona: Detailed persona description (2000 words of pure text), must include:
-   - Basic information (age, profession, educational background, location)
-   - Personal background (important experiences, event associations, social relationships)
-   - Personality traits (MBTI type, core personality, emotional expression)
-   - Social media behavior (posting frequency, content preferences, interaction style, language characteristics)
-   - Positions and views (attitudes toward topics, content that may provoke/touch emotions)
-   - Unique features (catchphrases, special experiences, personal interests)
-   - Personal memories (important part of persona, introduce this individual's association with events and their existing actions/reactions in events)
+1. bio: Social media bio, max 200 characters
+2. persona: Persona description (300-500 words, strict maximum 500 words), must include:
+   - Background (profession, age, location, key experiences)
+   - Personality and communication style (tone, language, how they argue)
+   - Core positions and views on the topics at hand
+   - What motivates or provokes them
 3. age: Age as number (must be integer)
 4. gender: Gender, must be in English: "male" or "female"
 5. mbti: MBTI type (e.g., INTJ, ENFP)
@@ -671,10 +668,9 @@ Please generate JSON containing the following fields:
 8. interested_topics: Array of interested topics
 
 Important:
+- persona MUST be under 500 words. Be concise and specific, not exhaustive.
 - All field values must be strings or numbers, do not use newlines
-- persona must be a coherent text description
 - Use English
-- Content must be consistent with entity information
 - age must be a valid integer, gender must be "male" or "female"
 """
 
@@ -689,9 +685,9 @@ Important:
         """Build detailed persona prompt for group/institutional entities"""
 
         attrs_str = json.dumps(entity_attributes, ensure_ascii=False) if entity_attributes else "None"
-        context_str = context[:3000] if context else "No additional context"
+        context_str = context[:1500] if context else "No additional context"
 
-        return f"""Generate detailed social media account profile for institutional/group entity, maximizing restoration of existing reality.
+        return f"""Generate a concise social media account profile for an institutional/group entity.
 
 Entity Name: {entity_name}
 Entity Type: {entity_type}
@@ -703,28 +699,25 @@ Context Information:
 
 Please generate JSON containing the following fields:
 
-1. bio: Official account bio, 200 characters, professional and appropriate
-2. persona: Detailed account profile description (2000 words of pure text), must include:
-   - Basic institutional information (official name, organizational nature, founding background, main functions)
-   - Account positioning (account type, target audience, core functions)
-   - Speaking style (language characteristics, common expressions, taboo topics)
-   - Content publishing characteristics (content types, publishing frequency, active time periods)
-   - Position and attitude (official stance on core topics, handling of controversies)
-   - Special notes (group profiles represented, operational habits)
-   - Institutional memories (important part of institutional persona, introduce this institution's association with events and their existing actions/reactions in events)
+1. bio: Official account bio, max 200 characters
+2. persona: Account profile description (300-500 words, strict maximum 500 words), must include:
+   - What this organization is and its core function
+   - Communication tone and style (formal/informal, data-driven/emotional, how it engages)
+   - Official positions on key topics
+   - How it handles controversies or criticism
 3. age: Fixed at 30 (virtual age of institutional account)
-4. gender: Fixed at "other" (institutional account uses other to denote non-individual)
-5. mbti: MBTI type used to describe account style, e.g., ISTJ represents rigorous conservative
+4. gender: Fixed at "other" (institutional account)
+5. mbti: MBTI type for account style, e.g., ISTJ for rigorous conservative
 6. country: Country (use English, e.g., "US")
 7. profession: Institutional function description
 8. interested_topics: Array of focus areas
 
 Important:
+- persona MUST be under 500 words. Be concise and specific, not exhaustive.
 - All field values must be strings or numbers, no null values allowed
-- persona must be a coherent text description, do not use newlines
 - Use English
 - age must be integer 30, gender must be string "other"
-- Institutional account speech must match its identity positioning"""
+"""
     
     def _generate_profile_rule_based(
         self,

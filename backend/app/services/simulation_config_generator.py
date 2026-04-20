@@ -25,24 +25,24 @@ from .entity_reader import EntityNode
 
 logger = get_logger('mirofish.simulation_config')
 
-# Time zone configuration for Chinese work schedules (Beijing Time)
-CHINA_TIMEZONE_CONFIG = {
-    # Dead hours (almost no activity)
+# Time zone configuration for Central European Time (Berlin)
+TIMEZONE_CONFIG = {
+    # Dead hours (almost no activity) — 0:00–5:00 CET
     "dead_hours": [0, 1, 2, 3, 4, 5],
-    # Morning hours (gradually waking up)
+    # Morning hours (gradually waking up) — 6:00–8:00 CET
     "morning_hours": [6, 7, 8],
-    # Work hours
-    "work_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-    # Evening peak (most active)
-    "peak_hours": [19, 20, 21, 22],
-    # Night hours (activity decreases)
+    # Work hours — 9:00–17:00 CET
+    "work_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17],
+    # Evening peak (most active) — 18:00–22:00 CET
+    "peak_hours": [18, 19, 20, 21, 22],
+    # Night hours (activity decreases) — 23:00 CET
     "night_hours": [23],
     # Activity multipliers
     "activity_multipliers": {
         "dead": 0.05,      # Almost no one in early morning
         "morning": 0.4,    # Gradually active in morning
         "work": 0.7,       # Medium activity during work hours
-        "peak": 1.5,       # Evening peak
+        "peak": 1.5,       # Evening peak (after work)
         "night": 0.5       # Activity decreases at night
     }
 }
@@ -94,7 +94,7 @@ class TimeSimulationConfig:
     agents_per_hour_max: int = 20
 
     # Peak hours (evening 19-22, most active time for Chinese people)
-    peak_hours: List[int] = field(default_factory=lambda: [19, 20, 21, 22])
+    peak_hours: List[int] = field(default_factory=lambda: [18, 19, 20, 21, 22])
     peak_activity_multiplier: float = 1.5
 
     # Off-peak hours (early morning 0-5, almost no activity)
@@ -106,7 +106,7 @@ class TimeSimulationConfig:
     morning_activity_multiplier: float = 0.4
 
     # Work hours
-    work_hours: List[int] = field(default_factory=lambda: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
+    work_hours: List[int] = field(default_factory=lambda: [9, 10, 11, 12, 13, 14, 15, 16, 17])
     work_activity_multiplier: float = 0.7
 
 
@@ -577,10 +577,10 @@ Example:
     "minutes_per_round": 60,
     "agents_per_hour_min": 5,
     "agents_per_hour_max": 50,
-    "peak_hours": [19, 20, 21, 22],
+    "peak_hours": [18, 19, 20, 21, 22],
     "off_peak_hours": [0, 1, 2, 3, 4, 5],
     "morning_hours": [6, 7, 8],
-    "work_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "work_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17],
     "reasoning": "Explanation of time configuration for this event"
 }}
 
@@ -589,13 +589,13 @@ Field description:
 - minutes_per_round (int): Time per round, 30-120 minutes, recommend 60 minutes
 - agents_per_hour_min (int): Minimum agents activated per hour (range: 1-{max_agents_allowed})
 - agents_per_hour_max (int): Maximum agents activated per hour (range: 1-{max_agents_allowed})
-- peak_hours (int array): Peak hours, adjust based on event participants
-- off_peak_hours (int array): Off-peak hours, usually late night/early morning
+- peak_hours (int array): Peak social media hours (Central European Time), typically after work
+- off_peak_hours (int array): Off-peak hours, late night/early morning
 - morning_hours (int array): Morning hours
 - work_hours (int array): Work hours
 - reasoning (string): Brief explanation for this configuration"""
 
-        system_prompt = "You are a social media simulation expert. Return pure JSON format, time configuration must follow Chinese work schedule habits."
+        system_prompt = "You are a social media simulation expert. Return pure JSON format, time configuration must follow Central European Time (CET/CEST, Berlin) schedule habits."
 
         try:
             return self._call_llm_with_retry(prompt, system_prompt)
@@ -604,17 +604,17 @@ Field description:
             return self._get_default_time_config(num_entities)
     
     def _get_default_time_config(self, num_entities: int) -> Dict[str, Any]:
-        """Get default time configuration (Chinese work schedule)"""
+        """Get default time configuration (Central European Time / Berlin)"""
         return {
             "total_simulation_hours": 72,
             "minutes_per_round": 60,  # 1 hour per round, speed up time
             "agents_per_hour_min": max(1, num_entities // 15),
             "agents_per_hour_max": max(5, num_entities // 5),
-            "peak_hours": [19, 20, 21, 22],
+            "peak_hours": [18, 19, 20, 21, 22],
             "off_peak_hours": [0, 1, 2, 3, 4, 5],
             "morning_hours": [6, 7, 8],
-            "work_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-            "reasoning": "Using default Chinese work schedule configuration (1 hour per round)"
+            "work_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17],
+            "reasoning": "Using default CET/Berlin schedule (1 hour per round)"
         }
 
     def _parse_time_config(self, result: Dict[str, Any], num_entities: int) -> TimeSimulationConfig:
@@ -642,12 +642,12 @@ Field description:
             minutes_per_round=result.get("minutes_per_round", 60),  # Default 1 hour per round
             agents_per_hour_min=agents_per_hour_min,
             agents_per_hour_max=agents_per_hour_max,
-            peak_hours=result.get("peak_hours", [19, 20, 21, 22]),
+            peak_hours=result.get("peak_hours", [18, 19, 20, 21, 22]),
             off_peak_hours=result.get("off_peak_hours", [0, 1, 2, 3, 4, 5]),
             off_peak_activity_multiplier=0.05,  # Almost no one in early morning
             morning_hours=result.get("morning_hours", [6, 7, 8]),
             morning_activity_multiplier=0.4,
-            work_hours=result.get("work_hours", list(range(9, 19))),
+            work_hours=result.get("work_hours", list(range(9, 18))),
             work_activity_multiplier=0.7,
             peak_activity_multiplier=1.5
         )

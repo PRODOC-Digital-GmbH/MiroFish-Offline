@@ -47,7 +47,16 @@ class NERExtractor:
     """Extract entities and relations from text using local LLM."""
 
     def __init__(self, llm_client: Optional[LLMClient] = None, max_retries: int = 2):
-        self.llm = llm_client or LLMClient()
+        if llm_client:
+            self.llm = llm_client
+        else:
+            from ..config import Config
+            ner_model = Config.NER_MODEL_NAME
+            if ner_model:
+                logger.info(f"NERExtractor using dedicated model: {ner_model}")
+                self.llm = LLMClient(model=ner_model)
+            else:
+                self.llm = LLMClient()
         self.max_retries = max_retries
 
     def extract(self, text: str, ontology: Dict[str, Any]) -> Dict[str, Any]:

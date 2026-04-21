@@ -173,7 +173,10 @@ export const getEnvStatus = (data) => {
  * @param {Object} data - { simulation_id, interviews: [{ agent_id, prompt }] }
  */
 export const interviewAgents = (data) => {
-  return requestWithRetry(() => service.post('/api/simulation/interview/batch', data), 3, 1000)
+  return requestWithRetry(() => service.post('/api/simulation/interview/batch', {
+    ...data,
+    timeout: 60  // Cap interview timeout at 60s instead of default 120s
+  }), 1, 1000)  // No retries — fail fast with clear error
 }
 
 /**

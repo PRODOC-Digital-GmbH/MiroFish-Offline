@@ -768,7 +768,11 @@ const sendToAgent = async (message) => {
       throw new Error('No response data')
     }
   } else {
-    throw new Error(res.error || 'Request failed')
+    const errorMsg = res.error || 'Request failed'
+    if (errorMsg.includes('not running') || errorMsg.includes('closed') || errorMsg.includes('timeout')) {
+      throw new Error('Simulation environment is no longer active. The agent cannot respond because the simulation process has ended. Try using "Chat with Report Agent" instead — it works without a running simulation.')
+    }
+    throw new Error(errorMsg)
   }
 }
 
@@ -1319,6 +1323,8 @@ watch(() => props.simulationId, (newId) => {
   border-bottom: 1px solid #E5E7EB;
   background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%);
   gap: 16px;
+  position: relative;
+  z-index: 200;
 }
 
 .action-bar-header {
@@ -1829,7 +1835,7 @@ watch(() => props.simulationId, (newId) => {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
   max-height: 320px;
   overflow-y: auto;
-  z-index: 100;
+  z-index: 300;
 }
 
 .dropdown-header {

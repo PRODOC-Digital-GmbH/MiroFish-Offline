@@ -22,6 +22,7 @@ from ..config import Config
 from ..utils.logger import get_logger
 from .graph_memory_updater import GraphMemoryManager
 from .simulation_ipc import SimulationIPCClient, CommandType, IPCResponse
+from .benchmark_collector import BenchmarkCollector, evaluate_content
 
 logger = get_logger('mirofish.simulation_runner')
 
@@ -526,6 +527,20 @@ class SimulationRunner:
                 state.runner_status = RunnerStatus.COMPLETED
                 state.completed_at = datetime.now().isoformat()
                 logger.info(f"Simulation completed: {simulation_id}")
+
+                # Save simulation timing and run content evaluation (MIR-17)
+                try:
+                    benchmark = BenchmarkCollector(sim_dir)
+                    benchmark.set_timestamp("simulation", "start", state.started_at or datetime.now().isoformat())
+                    benchmark.set_timestamp("simulation", "end", state.completed_at)
+                    benchmark.set_metric("simulation_rounds", state.current_round)
+                    benchmark.set_metric("total_actions", state.twitter_actions_count + state.reddit_actions_count)
+                    benchmark.set_metric("twitter_actions", state.twitter_actions_count)
+                    benchmark.set_metric("reddit_actions", state.reddit_actions_count)
+                    benchmark.save()
+                    evaluate_content(sim_dir)
+                except Exception as bench_err:
+                    logger.warning(f"Benchmark collection failed: {bench_err}")
             else:
                 state.runner_status = RunnerStatus.FAILED
                 # Read error info from main log file

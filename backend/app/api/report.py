@@ -12,6 +12,7 @@ from . import report_bp
 from ..config import Config
 from ..services.report_agent import ReportAgent, ReportManager, ReportStatus
 from ..services.simulation_manager import SimulationManager
+from ..services.benchmark_collector import BenchmarkCollector
 from ..models.project import ProjectManager
 from ..models.task import TaskManager, TaskStatus
 from ..services.graph_tools import GraphToolsService
@@ -76,6 +77,16 @@ def generate_report():
         graph_tools = GraphToolsService(storage=storage)
 
         def run_generate():
+            # Track report timing in benchmark (MIR-17)
+            sim_dir = os.path.join(Config.OASIS_SIMULATION_DATA_DIR, simulation_id)
+            benchmark = None
+            if os.path.isdir(sim_dir):
+                try:
+                    benchmark = BenchmarkCollector(sim_dir)
+                    benchmark.start_phase("report")
+                except Exception:
+                    benchmark = None
+
             try:
                 task_manager.update_task(task_id, status=TaskStatus.PROCESSING, progress=0, message="Initializing Report Agent...")
                 agent = ReportAgent(
@@ -91,6 +102,15 @@ def generate_report():
                 if report.status == ReportStatus.COMPLETED:
                     export_path = ReportManager.export_named_copy(report.report_id, simulation_id)
                     task_manager.complete_task(task_id, result={"report_id": report.report_id, "simulation_id": simulation_id, "status": "completed", "export_path": export_path})
+
+                    if benchmark:
+                        try:
+                            benchmark.end_phase("report")
+                            section_count = len(report.outline.sections) if report.outline and report.outline.sections else 0
+                            benchmark.set_metric("report_sections", section_count)
+                            benchmark.save()
+                        except Exception as bench_err:
+                            logger.warning(f"Failed to save report timing: {bench_err}")
                 else:
                     task_manager.fail_task(task_id, report.error or "Report generation failed")
             except Exception as e:

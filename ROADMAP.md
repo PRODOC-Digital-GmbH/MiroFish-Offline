@@ -37,6 +37,7 @@ Fully local fork running on Neo4j CE + Ollama. All Zep Cloud dependencies remove
 - [ ] Custom agent archetypes: define personality templates beyond OASIS defaults
 - [ ] Multi-language simulation support (agents can interact in different languages)
 - [ ] Export simulation transcripts as structured JSON for external analysis
+- [ ] Content quality: formal/informal style metrics (NLP-based or heuristic Gunning-Fog/Flesch)
 
 ### v0.7.0 — Graph Intelligence
 - [ ] Community detection (Louvain/Leiden) to auto-identify entity clusters

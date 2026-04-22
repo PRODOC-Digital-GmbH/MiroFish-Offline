@@ -574,16 +574,16 @@ Write a "future prediction report" that answers:
 - Section structure is designed independently based on prediction results
 
 Please output the report outline in JSON format as follows:
-{
+{{
     "title": "Report Title",
     "summary": "Report Summary (one sentence summarizing core prediction findings)",
     "sections": [
-        {
+        {{
             "title": "Section Title",
             "description": "Section Content Description"
-        }
+        }}
     ]
-}
+}}
 
 Note: sections array must have at least 2 and at most 5 elements!
 IMPORTANT: The entire report outline (title, summary, section titles and descriptions) MUST be in {output_language}. Never use any other language."""

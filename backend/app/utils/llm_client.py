@@ -116,6 +116,11 @@ class LLMClient:
         cleaned_response = cleaned_response.strip()
 
         try:
-            return json.loads(cleaned_response)
+            parsed = json.loads(cleaned_response)
         except json.JSONDecodeError:
             raise ValueError(f"Invalid JSON format from LLM: {cleaned_response}")
+
+        # Some models produce keys with leading/trailing whitespace or newlines
+        if isinstance(parsed, dict):
+            parsed = {k.strip(): v for k, v in parsed.items()}
+        return parsed

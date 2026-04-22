@@ -17,6 +17,7 @@ from ..utils.logger import get_logger
 from .entity_reader import EntityReader, FilteredEntities
 from .oasis_profile_generator import OasisProfileGenerator, OasisAgentProfile
 from .simulation_config_generator import SimulationConfigGenerator, SimulationParameters
+from .benchmark_collector import BenchmarkCollector
 
 logger = get_logger('mirofish.simulation')
 
@@ -306,8 +307,10 @@ class SimulationManager:
             self._save_simulation_state(state)
             
             sim_dir = self._get_simulation_dir(simulation_id)
-            
+            benchmark = BenchmarkCollector(sim_dir)
+
             # ========== Phase 1: Read and filter entities ==========
+            benchmark.start_phase("entity_reading")
             if progress_callback:
                 progress_callback("reading", 0, "Connecting to graph...")
 
@@ -335,6 +338,9 @@ class SimulationManager:
                     total=filtered.filtered_count
                 )
             
+            benchmark.end_phase("entity_reading")
+            benchmark.set_metric("entities_count", filtered.filtered_count)
+
             if filtered.filtered_count == 0:
                 state.status = SimulationStatus.FAILED
                 state.error = "No entities matching criteria found, check if graph is correctly constructed"
@@ -342,8 +348,9 @@ class SimulationManager:
                 return state
             
             # ========== Phase 2: Generate Agent Profile ==========
+            benchmark.start_phase("profile_generation")
             total_entities = len(filtered.entities)
-            
+
             if progress_callback:
                 progress_callback(
                     "generating_profiles", 0, 
@@ -426,8 +433,16 @@ class SimulationManager:
                     current=len(profiles),
                     total=len(profiles)
                 )
-            
+
+            benchmark.end_phase("profile_generation")
+            benchmark.set_metric("agents_count", len(profiles))
+            if total_entities > 0:
+                durations = benchmark.get_durations()
+                if "profile_generation" in durations:
+                    benchmark.set_metric("avg_persona_seconds", round(durations["profile_generation"] / total_entities, 1))
+
             # ========== Phase 3: LLM intelligent generation of simulation config ==========
+            benchmark.start_phase("config_generation")
             if progress_callback:
                 progress_callback(
                     "generating_config", 0, 
@@ -475,15 +490,28 @@ class SimulationManager:
             
             if progress_callback:
                 progress_callback(
-                    "generating_config", 100, 
+                    "generating_config", 100,
                     "Config generation completed",
                     current=3,
                     total=3
                 )
-            
+
+            benchmark.end_phase("config_generation")
+
+            # Extract metrics from generated config
+            if hasattr(sim_params, 'time_config') and sim_params.time_config:
+                tc = sim_params.time_config
+                hours = getattr(tc, 'total_simulation_hours', 72)
+                mins_per_round = getattr(tc, 'minutes_per_round', 60)
+                if mins_per_round > 0:
+                    benchmark.set_metric("llm_suggested_rounds", int(hours * 60 / mins_per_round))
+
+            # Save timing data (will be extended by simulation_runner and report)
+            benchmark.save()
+
             # Note: Run scripts remain in backend/scripts/ directory, no longer copy to simulation directory
             # When starting simulation, simulation_runner runs scripts from scripts/ directory
-            
+
             # Update status
             state.status = SimulationStatus.READY
             self._save_simulation_state(state)

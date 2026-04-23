@@ -644,7 +644,7 @@ class OasisProfileGenerator:
         lang = Config.OUTPUT_LANGUAGE
 
         attrs_str = json.dumps(entity_attributes, ensure_ascii=False) if entity_attributes else "None"
-        context_str = context[:1500] if context else "No additional context"
+        context_str = context[:2000] if context else "No additional context"
 
         return f"""Generate a concise social media user persona for the entity.
 
@@ -659,11 +659,13 @@ Context Information:
 Please generate JSON containing the following fields:
 
 1. bio: Social media bio, max 200 characters
-2. persona: Persona description (300-500 words, strict maximum 500 words), must include:
+2. persona: Persona description (400-800 words, strict maximum 800 words), must include:
    - Background (profession, age, location, key experiences)
    - Personality and communication style (tone, language, how they argue)
    - Core positions and views on the topics at hand
    - What motivates or provokes them
+   - Communication Style on Social Media: How they typically write online (short punchy reactions vs. long detailed analyses, formal vs. casual tone, use of emojis/hashtags/slang)
+   - Social Media Behavior Patterns: Their typical post length range in words (e.g., "usually writes 5-30 word reactions" or "tends to write 100-250 word analytical posts"), whether they reply often or create original posts
 3. age: Age as number (must be integer)
 4. gender: Gender, must be in English: "male" or "female"
 5. mbti: MBTI type (e.g., INTJ, ENFP)
@@ -672,7 +674,7 @@ Please generate JSON containing the following fields:
 8. interested_topics: Array of interested topics
 
 Important:
-- persona MUST be under 500 words. Be concise and specific, not exhaustive.
+- persona MUST be under 800 words. Be detailed about communication style and post-length tendencies.
 - All field values must be strings or numbers, do not use newlines
 - ALL text content MUST be in {lang} only. Do not use any other language.
 - age must be a valid integer, gender must be "male" or "female"
@@ -691,7 +693,7 @@ Important:
         lang = Config.OUTPUT_LANGUAGE
 
         attrs_str = json.dumps(entity_attributes, ensure_ascii=False) if entity_attributes else "None"
-        context_str = context[:1500] if context else "No additional context"
+        context_str = context[:2000] if context else "No additional context"
 
         return f"""Generate a concise social media account profile for an institutional/group entity.
 
@@ -706,11 +708,13 @@ Context Information:
 Please generate JSON containing the following fields:
 
 1. bio: Official account bio, max 200 characters
-2. persona: Account profile description (300-500 words, strict maximum 500 words), must include:
+2. persona: Account profile description (400-800 words, strict maximum 800 words), must include:
    - What this organization is and its core function
    - Communication tone and style (formal/informal, data-driven/emotional, how it engages)
    - Official positions on key topics
    - How it handles controversies or criticism
+   - Social Media Communication Style: How the account typically writes (press-release tone vs. conversational, use of statistics/citations, hashtag usage)
+   - Typical Post Patterns: Characteristic post length range in words (e.g., "typically publishes 80-150 word announcements"), format preferences (threads, single paragraphs)
 3. age: Fixed at 30 (virtual age of institutional account)
 4. gender: Fixed at "other" (institutional account)
 5. mbti: MBTI type for account style, e.g., ISTJ for rigorous conservative
@@ -719,7 +723,7 @@ Please generate JSON containing the following fields:
 8. interested_topics: Array of focus areas
 
 Important:
-- persona MUST be under 500 words. Be concise and specific, not exhaustive.
+- persona MUST be under 800 words. Be detailed about communication style and typical post patterns.
 - All field values must be strings or numbers, no null values allowed
 - ALL text content MUST be in {lang} only. Do not use any other language.
 - age must be integer 30, gender must be string "other"
@@ -1051,6 +1055,10 @@ Important:
                 user_char = profile.bio
                 if profile.persona and profile.persona != profile.bio:
                     user_char = f"{profile.bio} {profile.persona}"
+                # Append post-length guidance based on entity type
+                post_guidance = self._get_post_length_guidance(profile.source_entity_type)
+                if post_guidance:
+                    user_char = f"{user_char}{post_guidance}"
                 # Handle newlines (replace with space in CSV)
                 user_char = user_char.replace('\n', ' ').replace('\r', ' ')
 
@@ -1067,7 +1075,41 @@ Important:
                 writer.writerow(row)
 
         logger.info(f"Saved {len(profiles)} Twitter profiles to {file_path} (OASIS CSV format)")
-    
+
+    def _get_post_length_guidance(self, entity_type: Optional[str]) -> str:
+        """Return post-length guidance based on entity type for agent system prompt."""
+        if not entity_type:
+            return ""
+
+        et = entity_type.lower()
+
+        if et in ("expert", "professor", "faculty", "official"):
+            return (" [Post-Length Guidance: Your posts are typically 150-300 words. "
+                    "You write detailed analyses with structured arguments. "
+                    "Occasionally you post brief 10-20 word endorsements or corrections.]")
+
+        if et in ("person", "student", "alumni", "activist"):
+            return (" [Post-Length Guidance: Your posts are typically 5-50 words. "
+                    "You write brief reactions, opinions, and hot takes. "
+                    "Occasionally you write a longer 80-150 word post when something really matters to you.]")
+
+        if et in ("journalist", "publicfigure"):
+            return (" [Post-Length Guidance: Your post length varies widely. "
+                    "Sometimes you post 5-15 word hot takes or breaking-news one-liners. "
+                    "Other times you write 100-200 word analyses or commentary.]")
+
+        if et in ("mediaoutlet",):
+            return (" [Post-Length Guidance: Your posts are typically 80-150 words in journalistic style. "
+                    "You lead with the key fact, then provide context. "
+                    "Breaking news posts can be as short as 10-20 words.]")
+
+        if et in ("organization", "governmentagency", "university", "ngo",
+                  "company", "institution", "group", "community"):
+            return (" [Post-Length Guidance: Your posts are typically 100-200 words, formal and measured. "
+                    "Announcements may be 50-80 words, policy statements 150-250 words.]")
+
+        return ""
+
     def _normalize_gender(self, gender: Optional[str]) -> str:
         """
         Normalize gender field to OASIS required English format
@@ -1108,13 +1150,19 @@ Important:
         """
         data = []
         for idx, profile in enumerate(profiles):
+            # Build persona with post-length guidance
+            persona_text = profile.persona or f"{profile.name} is a participant in social discussions."
+            post_guidance = self._get_post_length_guidance(profile.source_entity_type)
+            if post_guidance:
+                persona_text = f"{persona_text}{post_guidance}"
+
             # Use format consistent with to_reddit_format()
             item = {
                 "user_id": profile.user_id if profile.user_id is not None else idx,  # Key: must include user_id
                 "username": profile.user_name,
                 "name": profile.name,
                 "bio": profile.bio[:150] if profile.bio else f"{profile.name}",
-                "persona": profile.persona or f"{profile.name} is a participant in social discussions.",
+                "persona": persona_text,
                 "karma": profile.karma if profile.karma else 1000,
                 "created_at": profile.created_at,
                 # OASIS required fields - ensure all have defaults

@@ -362,9 +362,9 @@ class TestQualityScore:
             "exact_duplicates": 0,
             "near_duplicates": 0,
             "non_target_language_pct": 0,
-            "avg_length_words": 30,    # sweet spot 15-50
-            "avg_emojis_per_post": 0.3, # sweet spot 0.1-0.5
-            "avg_hashtags_per_post": 0.5, # sweet spot 0.2-1.0
+            "avg_length_words": 60,    # sweet spot 30-120
+            "avg_emojis_per_post": 0.5, # sweet spot 0.1-1.0
+            "avg_hashtags_per_post": 1.0, # sweet spot 0.2-2.0
         }
         score = _calc_quality_score(stats)
         assert score == 100.0
@@ -378,9 +378,9 @@ class TestQualityScore:
             "exact_duplicates": 0,
             "near_duplicates": 0,
             "non_target_language_pct": 0,
-            "avg_length_words": 30,
-            "avg_emojis_per_post": 0.3,
-            "avg_hashtags_per_post": 0.5,
+            "avg_length_words": 60,
+            "avg_emojis_per_post": 0.5,
+            "avg_hashtags_per_post": 1.0,
         }
         with_dupes = {**perfect, "exact_duplicates": 10, "near_duplicates": 5}
 
@@ -393,9 +393,9 @@ class TestQualityScore:
             "total_posts": 100,
             "exact_duplicates": 0,
             "near_duplicates": 0,
-            "avg_length_words": 30,
-            "avg_emojis_per_post": 0.3,
-            "avg_hashtags_per_post": 0.5,
+            "avg_length_words": 60,
+            "avg_emojis_per_post": 0.5,
+            "avg_hashtags_per_post": 1.0,
         }
         score_clean = _calc_quality_score({**base, "non_target_language_pct": 0})
         score_mixed = _calc_quality_score({**base, "non_target_language_pct": 50})
@@ -410,7 +410,7 @@ class TestQualityScore:
             "avg_emojis_per_post": 0.3,
             "avg_hashtags_per_post": 0.5,
         }
-        score_good = _calc_quality_score({**base, "avg_length_words": 30})
+        score_good = _calc_quality_score({**base, "avg_length_words": 60})
         score_short = _calc_quality_score({**base, "avg_length_words": 3})
         assert score_short < score_good
 

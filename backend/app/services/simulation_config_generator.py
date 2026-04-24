@@ -694,7 +694,7 @@ Simulation Requirements: {simulation_requirement}
 ## Task
 Please generate event configuration JSON:
 - Extract hot topic keywords
-- Describe opinion development direction
+- List the key discussion topics and open questions for agents to explore (do NOT prescribe how opinions should develop — let dynamics emerge from agent interactions)
 - Design initial post content, **each post must specify poster_type (publisher type)**
 
 **Important**: poster_type must be selected from the "Available Entity Types" above so initial posts can be assigned to appropriate agents for publishing.
@@ -703,7 +703,7 @@ Example: Official statements should be published by Official/University type, ne
 Return JSON format (no markdown):
 {{
     "hot_topics": ["keyword1", "keyword2", ...],
-    "narrative_direction": "<description of opinion development direction>",
+    "discussion_topics": "<key topics and open questions to explore>",
     "initial_posts": [
         {{"content": "post content", "poster_type": "entity type (must select from available types)"}},
         ...
@@ -730,7 +730,7 @@ Return JSON format (no markdown):
             initial_posts=result.get("initial_posts", []),
             scheduled_events=[],
             hot_topics=result.get("hot_topics", []),
-            narrative_direction=result.get("narrative_direction", "")
+            narrative_direction=result.get("discussion_topics", result.get("narrative_direction", ""))
         )
     
     def _assign_initial_post_agents(

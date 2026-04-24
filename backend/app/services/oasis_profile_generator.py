@@ -1086,29 +1086,36 @@ Important:
         if et in ("expert", "professor", "faculty", "official"):
             return (" [Post-Length Guidance: Your posts are typically 150-300 words. "
                     "You write detailed analyses with structured arguments. "
-                    "Occasionally you post brief 10-20 word endorsements or corrections.]")
+                    "Occasionally you post brief 10-20 word endorsements or corrections. "
+                    "Use emojis sparingly (0-2 per post, not in every post). Use max 2 hashtags per post.]")
 
         if et in ("person", "student", "alumni", "activist"):
             return (" [Post-Length Guidance: Your posts are typically 5-50 words. "
                     "You write brief reactions, opinions, and hot takes. "
-                    "Occasionally you write a longer 80-150 word post when something really matters to you.]")
+                    "Occasionally you write a longer 80-150 word post when something really matters to you. "
+                    "Use emojis sparingly (0-2 per post, not in every post). Use max 2 hashtags per post.]")
 
-        if et in ("journalist", "publicfigure"):
+        if et in ("journalist", "publicfigure", "celebrity"):
             return (" [Post-Length Guidance: Your post length varies widely. "
                     "Sometimes you post 5-15 word hot takes or breaking-news one-liners. "
-                    "Other times you write 100-200 word analyses or commentary.]")
+                    "Other times you write 100-200 word analyses or commentary. "
+                    "Use emojis sparingly (0-2 per post, not in every post). Use max 2 hashtags per post.]")
 
         if et in ("mediaoutlet",):
             return (" [Post-Length Guidance: Your posts are typically 80-150 words in journalistic style. "
                     "You lead with the key fact, then provide context. "
-                    "Breaking news posts can be as short as 10-20 words.]")
+                    "Breaking news posts can be as short as 10-20 words. "
+                    "Use emojis sparingly (0-2 per post, not in every post). Use max 2 hashtags per post.]")
 
         if et in ("organization", "governmentagency", "university", "ngo",
                   "company", "institution", "group", "community"):
             return (" [Post-Length Guidance: Your posts are typically 100-200 words, formal and measured. "
-                    "Announcements may be 50-80 words, policy statements 150-250 words.]")
+                    "Announcements may be 50-80 words, policy statements 150-250 words. "
+                    "Use emojis sparingly (0-2 per post, not in every post). Use max 2 hashtags per post.]")
 
-        return ""
+        # Default for unrecognized entity types
+        return (" [Post-Length Guidance: Write naturally varied posts. "
+                "Use emojis sparingly (0-2 per post, not in every post). Use max 2 hashtags per post.]")
 
     def _normalize_gender(self, gender: Optional[str]) -> str:
         """

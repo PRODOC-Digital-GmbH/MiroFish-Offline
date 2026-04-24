@@ -237,9 +237,9 @@ def _calc_quality_score(stats: Dict[str, Any]) -> float:
     Simple weighted quality score (0-100).
     - No duplicates: +30
     - Target language 100%: +25
-    - Avg word length 15-50: +20
-    - Emoji usage 0.1-0.5/post: +15
-    - Hashtag usage 0.2-1.0/post: +10
+    - Avg word length 30-120: +20
+    - Emoji usage 0.1-1.0/post: +15
+    - Hashtag usage 0.2-2.0/post: +10
     """
     score = 0.0
     total = stats.get("total_posts", 0)
@@ -254,33 +254,33 @@ def _calc_quality_score(stats: Dict[str, Any]) -> float:
     non_target = stats.get("non_target_language_pct", 0) / 100
     score += max(0, 25 * (1 - non_target * 4))  # 25% non-target = 0 pts
 
-    # Avg word length (20 pts) — sweet spot 15-50
+    # Avg word length (20 pts) — sweet spot 30-120
     avg_words = stats.get("avg_length_words", 0)
-    if 15 <= avg_words <= 50:
+    if 30 <= avg_words <= 120:
         score += 20
-    elif 5 <= avg_words < 15:
-        score += 20 * (avg_words - 5) / 10
-    elif 50 < avg_words <= 80:
-        score += 20 * (80 - avg_words) / 30
+    elif 10 <= avg_words < 30:
+        score += 20 * (avg_words - 10) / 20
+    elif 120 < avg_words <= 200:
+        score += 20 * (200 - avg_words) / 80
     # else: 0
 
-    # Emoji usage (15 pts) — sweet spot 0.1-0.5 per post
+    # Emoji usage (15 pts) — sweet spot 0.1-1.0 per post
     avg_emoji = stats.get("avg_emojis_per_post", 0)
-    if 0.1 <= avg_emoji <= 0.5:
+    if 0.1 <= avg_emoji <= 1.0:
         score += 15
     elif 0 <= avg_emoji < 0.1:
         score += 15 * avg_emoji / 0.1
-    elif 0.5 < avg_emoji <= 2.0:
-        score += max(0, 15 * (2.0 - avg_emoji) / 1.5)
+    elif 1.0 < avg_emoji <= 3.0:
+        score += max(0, 15 * (3.0 - avg_emoji) / 2.0)
 
-    # Hashtag usage (10 pts) — sweet spot 0.2-1.0 per post
+    # Hashtag usage (10 pts) — sweet spot 0.2-2.0 per post
     avg_hash = stats.get("avg_hashtags_per_post", 0)
-    if 0.2 <= avg_hash <= 1.0:
+    if 0.2 <= avg_hash <= 2.0:
         score += 10
     elif 0 <= avg_hash < 0.2:
         score += 10 * avg_hash / 0.2
-    elif 1.0 < avg_hash <= 3.0:
-        score += max(0, 10 * (3.0 - avg_hash) / 2.0)
+    elif 2.0 < avg_hash <= 5.0:
+        score += max(0, 10 * (5.0 - avg_hash) / 3.0)
 
     return round(min(100, score), 1)
 

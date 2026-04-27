@@ -4,6 +4,7 @@
     <nav class="navbar" :style="s.navbar">
       <div class="nav-brand" :style="s.navBrand">{{ $t('common.brand') }}</div>
       <div class="nav-links" :style="s.navLinks">
+        <LanguageSelector />
         <a href="https://github.com/nikmcfly/MiroFish-Offline" target="_blank" class="github-link" :style="s.githubLink">
           {{ $t('home.visitGithub') }} <span>↗</span>
         </a>
@@ -145,6 +146,7 @@
 import { ref, computed, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
+import LanguageSelector from '../components/LanguageSelector.vue'
 
 const mono = 'JetBrains Mono, monospace'
 const sans = 'Space Grotesk, Noto Sans SC, system-ui, sans-serif'

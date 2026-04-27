@@ -8,7 +8,7 @@
           <!-- Report Header -->
           <div class="report-header-block">
             <div class="report-meta">
-              <span class="report-tag">Prediction Report</span>
+              <span class="report-tag">{{ $t('step4.predictionReport') }}</span>
               <span class="report-id">ID: {{ reportId || 'REF-2024-X92' }}</span>
             </div>
             <h1 class="main-title">{{ reportOutline.title }}</h1>
@@ -58,7 +58,7 @@
                       <path d="M12 2a10 10 0 0 1 10 10" stroke-width="4" stroke="#4B5563" stroke-linecap="round"></path>
                     </svg>
                   </div>
-                  <span class="loading-text">Generating {{ section.title }}...</span>
+                  <span class="loading-text">{{ $t('step4.generatingSection', { title: section.title }) }}</span>
                 </div>
               </div>
             </div>
@@ -72,7 +72,7 @@
             <div class="waiting-ring"></div>
             <div class="waiting-ring"></div>
           </div>
-          <span class="waiting-text">Waiting for Report Agent...</span>
+          <span class="waiting-text">{{ $t('step4.waitingForReportAgent') }}</span>
         </div>
       </div>
 
@@ -89,15 +89,15 @@
         <div class="workflow-overview" v-if="agentLogs.length > 0 || reportOutline">
           <div class="workflow-metrics">
             <div class="metric">
-              <span class="metric-label">Sections</span>
+              <span class="metric-label">{{ $t('step4.sections') }}</span>
               <span class="metric-value mono">{{ completedSections }}/{{ totalSections }}</span>
             </div>
             <div class="metric">
-              <span class="metric-label">Elapsed</span>
+              <span class="metric-label">{{ $t('step4.elapsed') }}</span>
               <span class="metric-value mono">{{ formatElapsedTime }}</span>
             </div>
             <div class="metric">
-              <span class="metric-label">Tools</span>
+              <span class="metric-label">{{ $t('step4.tools') }}</span>
               <span class="metric-value mono">{{ totalToolCalls }}</span>
             </div>
             <div class="metric metric-right">
@@ -129,7 +129,7 @@
 
           <!-- Next Step Button - Show after completion -->
           <button v-if="isComplete" class="next-step-btn" @click="goToInteraction">
-            <span>Enter Deep Interaction</span>
+            <span>{{ $t('step4.enterDeepInteraction') }}</span>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
@@ -182,7 +182,7 @@
                   <template v-if="log.action === 'planning_complete'">
                     <div class="status-message success">{{ log.details?.message }}</div>
                     <div class="outline-badge" v-if="log.details?.outline">
-                      {{ log.details.outline.sections?.length || 0 }} sections planned
+                      {{ $t('step4.sectionsPlanned', { count: log.details.outline.sections?.length || 0 }) }}
                     </div>
                   </template>
 
@@ -307,12 +307,12 @@
                   <!-- LLM Response -->
                   <template v-if="log.action === 'llm_response'">
                     <div class="llm-meta">
-                      <span class="meta-tag">Iteration {{ log.details?.iteration }}</span>
+                      <span class="meta-tag">{{ $t('step4.iteration', { n: log.details?.iteration }) }}</span>
                       <span class="meta-tag" :class="{ active: log.details?.has_tool_calls }">
-                        Tools: {{ log.details?.has_tool_calls ? 'Yes' : 'No' }}
+                        {{ log.details?.has_tool_calls ? $t('step4.toolsYes') : $t('step4.toolsNo') }}
                       </span>
                       <span class="meta-tag" :class="{ active: log.details?.has_final_answer, 'final-answer': log.details?.has_final_answer }">
-                        Final: {{ log.details?.has_final_answer ? 'Yes' : 'No' }}
+                        {{ log.details?.has_final_answer ? $t('step4.finalYes') : $t('step4.finalNo') }}
                       </span>
                     </div>
                     <!-- Show special hint when it's the final answer -->
@@ -320,7 +320,7 @@
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
-                      <span>Section "{{ log.section_title }}" content generated</span>
+                      <span>{{ $t('step4.sectionContentGenerated', { title: log.section_title }) }}</span>
                     </div>
                     <div v-if="expandedLogs.has(log.timestamp) && log.details?.response" class="llm-content">
                       <pre>{{ log.details.response }}</pre>
@@ -334,7 +334,7 @@
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                         <polyline points="22 4 12 14.01 9 11.01"></polyline>
                       </svg>
-                      <span>Report Generation Complete</span>
+                      <span>{{ $t('step4.reportGenerationComplete') }}</span>
                     </div>
                   </template>
                 </div>
@@ -347,17 +347,17 @@
                   <div class="footer-actions">
                     <!-- Tool Call: Show/Hide Params -->
                     <button v-if="log.action === 'tool_call' && log.details?.parameters" class="action-btn" @click.stop="toggleLogExpand(log)">
-                      {{ expandedLogs.has(log.timestamp) ? 'Hide Params' : 'Show Params' }}
+                      {{ expandedLogs.has(log.timestamp) ? $t('step4.hideParams') : $t('step4.showParams') }}
                     </button>
-                    
+
                     <!-- Tool Result: Raw/Structured View -->
                     <button v-if="log.action === 'tool_result'" class="action-btn" @click.stop="toggleRawResult(log.timestamp, $event)">
-                      {{ showRawResult[log.timestamp] ? 'Structured View' : 'Raw Output' }}
+                      {{ showRawResult[log.timestamp] ? $t('step4.structuredView') : $t('step4.rawOutput') }}
                     </button>
-                    
+
                     <!-- LLM Response: Show/Hide Response -->
                     <button v-if="log.action === 'llm_response' && log.details?.response" class="action-btn" @click.stop="toggleLogExpand(log)">
-                      {{ expandedLogs.has(log.timestamp) ? 'Hide Response' : 'Show Response' }}
+                      {{ expandedLogs.has(log.timestamp) ? $t('step4.hideResponse') : $t('step4.showResponse') }}
                     </button>
                   </div>
                 </div>
@@ -368,7 +368,7 @@
           <!-- Empty State -->
           <div v-if="agentLogs.length === 0 && !isComplete" class="workflow-empty">
             <div class="empty-pulse"></div>
-            <span>Waiting for agent activity...</span>
+            <span>{{ $t('step4.waitingForAgentActivity') }}</span>
           </div>
         </div>
       </div>
@@ -377,8 +377,8 @@
     <!-- Bottom Console Logs -->
     <div class="console-logs">
       <div class="log-header">
-        <span class="log-title">CONSOLE OUTPUT</span>
-        <span class="log-id">{{ reportId || 'NO_REPORT' }}</span>
+        <span class="log-title">{{ $t('step4.consoleOutput') }}</span>
+        <span class="log-id">{{ reportId || $t('step4.noReport') }}</span>
       </div>
       <div class="log-content" ref="logContent">
         <div class="log-line" v-for="(log, idx) in consoleLogs" :key="idx">
@@ -392,10 +392,12 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, h, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getAgentLog, getConsoleLog } from '../api/report'
 import { renderMarkdown, sanitizeHtml } from '../utils/markdown'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const props = defineProps({
   reportId: String,
@@ -496,39 +498,40 @@ const isLogCollapsed = (log) => {
 // Tool configurations with display names and colors
 const toolConfig = {
   'insight_forge': {
-    name: 'Deep Insight',
+    nameKey: 'step4.toolDeepInsight',
     color: 'purple',
     icon: 'lightbulb' // Lightbulb icon - represents insight
   },
   'panorama_search': {
-    name: 'Panorama Search',
+    nameKey: 'step4.toolPanoramaSearch',
     color: 'blue',
     icon: 'globe' // Globe icon - represents panorama search
   },
   'interview_agents': {
-    name: 'Agent Interview',
+    nameKey: 'step4.toolAgentInterview',
     color: 'green',
     icon: 'users' // User icon - represents conversation
   },
   'quick_search': {
-    name: 'Quick Search',
+    nameKey: 'step4.toolQuickSearch',
     color: 'orange',
     icon: 'zap' // Lightning icon - represents speed
   },
   'get_graph_statistics': {
-    name: 'Graph Stats',
+    nameKey: 'step4.toolGraphStats',
     color: 'cyan',
     icon: 'chart' // Chart icon - represents statistics
   },
   'get_entities_by_type': {
-    name: 'Entity Query',
+    nameKey: 'step4.toolEntityQuery',
     color: 'pink',
     icon: 'database' // Database icon - represents entities
   }
 }
 
 const getToolDisplayName = (toolName) => {
-  return toolConfig[toolName]?.name || toolName
+  const key = toolConfig[toolName]?.nameKey
+  return key ? t(key) : toolName
 }
 
 const getToolColor = (toolName) => {
@@ -982,21 +985,21 @@ const InsightDisplay = {
       // Header Section - like interview header
       h('div', { class: 'insight-header' }, [
         h('div', { class: 'header-main' }, [
-          h('div', { class: 'header-title' }, 'Deep Insight'),
+          h('div', { class: 'header-title' }, t('step4.toolDeepInsight')),
           h('div', { class: 'header-stats' }, [
             h('span', { class: 'stat-item' }, [
               h('span', { class: 'stat-value' }, props.result.stats.facts || props.result.facts.length),
-              h('span', { class: 'stat-label' }, 'Facts')
+              h('span', { class: 'stat-label' }, t('step4.insightFacts'))
             ]),
             h('span', { class: 'stat-divider' }, '/'),
             h('span', { class: 'stat-item' }, [
               h('span', { class: 'stat-value' }, props.result.stats.entities || props.result.entities.length),
-              h('span', { class: 'stat-label' }, 'Entities')
+              h('span', { class: 'stat-label' }, t('step4.insightEntities'))
             ]),
             h('span', { class: 'stat-divider' }, '/'),
             h('span', { class: 'stat-item' }, [
               h('span', { class: 'stat-value' }, props.result.stats.relationships || props.result.relations.length),
-              h('span', { class: 'stat-label' }, 'Relations')
+              h('span', { class: 'stat-label' }, t('step4.insightRelations'))
             ]),
             props.resultLength && h('span', { class: 'stat-divider' }, '·'),
             props.resultLength && h('span', { class: 'stat-size' }, formatSize(props.resultLength))
@@ -1004,7 +1007,7 @@ const InsightDisplay = {
         ]),
         props.result.query && h('div', { class: 'header-topic' }, props.result.query),
         props.result.simulationRequirement && h('div', { class: 'header-scenario' }, [
-          h('span', { class: 'scenario-label' }, 'Prediction Scenario: '),
+          h('span', { class: 'scenario-label' }, t('step4.predictionScenario')),
           h('span', { class: 'scenario-text' }, props.result.simulationRequirement)
         ])
       ]),
@@ -1015,25 +1018,25 @@ const InsightDisplay = {
           class: ['insight-tab', { active: activeTab.value === 'facts' }],
           onClick: () => { activeTab.value = 'facts' }
         }, [
-          h('span', { class: 'tab-label' }, `Current Key Memory (${props.result.facts.length})`)
+          h('span', { class: 'tab-label' }, t('step4.currentKeyMemory', { count: props.result.facts.length }))
         ]),
         h('button', {
           class: ['insight-tab', { active: activeTab.value === 'entities' }],
           onClick: () => { activeTab.value = 'entities' }
         }, [
-          h('span', { class: 'tab-label' }, `Core Entities (${props.result.entities.length})`)
+          h('span', { class: 'tab-label' }, t('step4.coreEntities', { count: props.result.entities.length }))
         ]),
         h('button', {
           class: ['insight-tab', { active: activeTab.value === 'relations' }],
           onClick: () => { activeTab.value = 'relations' }
         }, [
-          h('span', { class: 'tab-label' }, `Relationship Chains (${props.result.relations.length})`)
+          h('span', { class: 'tab-label' }, t('step4.relationshipChains', { count: props.result.relations.length }))
         ]),
         props.result.subQueries.length > 0 && h('button', {
           class: ['insight-tab', { active: activeTab.value === 'subqueries' }],
           onClick: () => { activeTab.value = 'subqueries' }
         }, [
-          h('span', { class: 'tab-label' }, `Sub-questions (${props.result.subQueries.length})`)
+          h('span', { class: 'tab-label' }, t('step4.subQuestions', { count: props.result.subQueries.length }))
         ])
       ]),
       
@@ -1042,8 +1045,8 @@ const InsightDisplay = {
         // Facts Tab
         activeTab.value === 'facts' && props.result.facts.length > 0 && h('div', { class: 'facts-panel' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Latest Key Facts Associated in Sequential Memory'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.facts.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.latestKeyFacts')),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.facts.length }))
           ]),
           h('div', { class: 'facts-list' },
             (expandedFacts.value ? props.result.facts : props.result.facts.slice(0, INITIAL_SHOW_COUNT)).map((fact, i) => 
@@ -1056,35 +1059,35 @@ const InsightDisplay = {
           props.result.facts.length > INITIAL_SHOW_COUNT && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedFacts.value = !expandedFacts.value }
-          }, expandedFacts.value ? `Collapse ▲` : `Expand All ${props.result.facts.length} items ▼`)
+          }, expandedFacts.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.facts.length }))
         ]),
         
         // Entities Tab
         activeTab.value === 'entities' && props.result.entities.length > 0 && h('div', { class: 'entities-panel' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Core Entities'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.entities.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.coreEntities', { count: props.result.entities.length })),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.entities.length }))
           ]),
           h('div', { class: 'entities-grid' },
-            (expandedEntities.value ? props.result.entities : props.result.entities.slice(0, 12)).map((entity, i) => 
+            (expandedEntities.value ? props.result.entities : props.result.entities.slice(0, 12)).map((entity, i) =>
               h('div', { class: 'entity-tag', key: i, title: entity.summary || '' }, [
                 h('span', { class: 'entity-name' }, entity.name),
                 h('span', { class: 'entity-type' }, entity.type),
-                entity.relatedFactsCount > 0 && h('span', { class: 'entity-fact-count' }, `${entity.relatedFactsCount} items`)
+                entity.relatedFactsCount > 0 && h('span', { class: 'entity-fact-count' }, `${entity.relatedFactsCount}`)
               ])
             )
           ),
           props.result.entities.length > 12 && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedEntities.value = !expandedEntities.value }
-          }, expandedEntities.value ? `Collapse ▲` : `Expand All ${props.result.entities.length} items ▼`)
+          }, expandedEntities.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.entities.length }))
         ]),
         
         // Relations Tab
         activeTab.value === 'relations' && props.result.relations.length > 0 && h('div', { class: 'relations-panel' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Relationship Chains'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.relations.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.relationshipChains', { count: props.result.relations.length })),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.relations.length }))
           ]),
           h('div', { class: 'relations-list' },
             (expandedRelations.value ? props.result.relations : props.result.relations.slice(0, INITIAL_SHOW_COUNT)).map((rel, i) => 
@@ -1102,14 +1105,14 @@ const InsightDisplay = {
           props.result.relations.length > INITIAL_SHOW_COUNT && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedRelations.value = !expandedRelations.value }
-          }, expandedRelations.value ? `Collapse ▲` : `Expand All ${props.result.relations.length} items ▼`)
+          }, expandedRelations.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.relations.length }))
         ]),
         
         // Sub-queries Tab
         activeTab.value === 'subqueries' && props.result.subQueries.length > 0 && h('div', { class: 'subqueries-panel' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Drift Query Generated Sub-questions'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.subQueries.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.driftQuerySubQuestions')),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.subQueries.length }))
           ]),
           h('div', { class: 'subqueries-list' },
             props.result.subQueries.map((sq, i) => 
@@ -1122,9 +1125,9 @@ const InsightDisplay = {
         ]),
         
         // Empty state
-        activeTab.value === 'facts' && props.result.facts.length === 0 && h('div', { class: 'empty-state' }, 'No current key memory'),
-        activeTab.value === 'entities' && props.result.entities.length === 0 && h('div', { class: 'empty-state' }, 'No core entities'),
-        activeTab.value === 'relations' && props.result.relations.length === 0 && h('div', { class: 'empty-state' }, 'No relationship chains')
+        activeTab.value === 'facts' && props.result.facts.length === 0 && h('div', { class: 'empty-state' }, t('step4.noCurrentKeyMemory')),
+        activeTab.value === 'entities' && props.result.entities.length === 0 && h('div', { class: 'empty-state' }, t('step4.noCoreEntities')),
+        activeTab.value === 'relations' && props.result.relations.length === 0 && h('div', { class: 'empty-state' }, t('step4.noRelationshipChains'))
       ])
     ])
   }
@@ -1153,16 +1156,16 @@ const PanoramaDisplay = {
       // Header Section
       h('div', { class: 'panorama-header' }, [
         h('div', { class: 'header-main' }, [
-          h('div', { class: 'header-title' }, 'Panorama Search'),
+          h('div', { class: 'header-title' }, t('step4.toolPanoramaSearch')),
           h('div', { class: 'header-stats' }, [
             h('span', { class: 'stat-item' }, [
               h('span', { class: 'stat-value' }, props.result.stats.nodes),
-              h('span', { class: 'stat-label' }, 'Nodes')
+              h('span', { class: 'stat-label' }, t('step4.panoramaNodes'))
             ]),
             h('span', { class: 'stat-divider' }, '/'),
             h('span', { class: 'stat-item' }, [
               h('span', { class: 'stat-value' }, props.result.stats.edges),
-              h('span', { class: 'stat-label' }, 'Edges')
+              h('span', { class: 'stat-label' }, t('step4.panoramaEdges'))
             ]),
             props.resultLength && h('span', { class: 'stat-divider' }, '·'),
             props.resultLength && h('span', { class: 'stat-size' }, formatSize(props.resultLength))
@@ -1177,19 +1180,19 @@ const PanoramaDisplay = {
           class: ['panorama-tab', { active: activeTab.value === 'active' }],
           onClick: () => { activeTab.value = 'active' }
         }, [
-          h('span', { class: 'tab-label' }, `Current Active Memory (${props.result.activeFacts.length})`)
+          h('span', { class: 'tab-label' }, t('step4.currentActiveMemory', { count: props.result.activeFacts.length }))
         ]),
         h('button', {
           class: ['panorama-tab', { active: activeTab.value === 'historical' }],
           onClick: () => { activeTab.value = 'historical' }
         }, [
-          h('span', { class: 'tab-label' }, `Historical Memory (${props.result.historicalFacts.length})`)
+          h('span', { class: 'tab-label' }, t('step4.historicalMemory', { count: props.result.historicalFacts.length }))
         ]),
         h('button', {
           class: ['panorama-tab', { active: activeTab.value === 'entities' }],
           onClick: () => { activeTab.value = 'entities' }
         }, [
-          h('span', { class: 'tab-label' }, `Involved Entities (${props.result.entities.length})`)
+          h('span', { class: 'tab-label' }, t('step4.involvedEntities', { count: props.result.entities.length }))
         ])
       ]),
       
@@ -1198,28 +1201,28 @@ const PanoramaDisplay = {
         // Active Facts Tab
         activeTab.value === 'active' && h('div', { class: 'facts-panel active-facts' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Current Active Memory'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.activeFacts.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.currentActiveMemory', { count: props.result.activeFacts.length })),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.activeFacts.length }))
           ]),
           props.result.activeFacts.length > 0 ? h('div', { class: 'facts-list' },
-            (expandedActive.value ? props.result.activeFacts : props.result.activeFacts.slice(0, INITIAL_SHOW_COUNT)).map((fact, i) => 
+            (expandedActive.value ? props.result.activeFacts : props.result.activeFacts.slice(0, INITIAL_SHOW_COUNT)).map((fact, i) =>
               h('div', { class: 'fact-item active', key: i }, [
                 h('span', { class: 'fact-number' }, i + 1),
                 h('div', { class: 'fact-content' }, fact)
               ])
             )
-          ) : h('div', { class: 'empty-state' }, 'No current active memory'),
+          ) : h('div', { class: 'empty-state' }, t('step4.noCurrentActiveMemory')),
           props.result.activeFacts.length > INITIAL_SHOW_COUNT && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedActive.value = !expandedActive.value }
-          }, expandedActive.value ? `Collapse ▲` : `Expand All ${props.result.activeFacts.length} items ▼`)
+          }, expandedActive.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.activeFacts.length }))
         ]),
         
         // Historical Facts Tab
         activeTab.value === 'historical' && h('div', { class: 'facts-panel historical-facts' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Historical Memory'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.historicalFacts.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.historicalMemory', { count: props.result.historicalFacts.length })),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.historicalFacts.length }))
           ]),
           props.result.historicalFacts.length > 0 ? h('div', { class: 'facts-list' },
             (expandedHistorical.value ? props.result.historicalFacts : props.result.historicalFacts.slice(0, INITIAL_SHOW_COUNT)).map((fact, i) => 
@@ -1240,31 +1243,31 @@ const PanoramaDisplay = {
                 ])
               ])
             )
-          ) : h('div', { class: 'empty-state' }, 'No historical memory'),
+          ) : h('div', { class: 'empty-state' }, t('step4.noHistoricalMemory')),
           props.result.historicalFacts.length > INITIAL_SHOW_COUNT && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedHistorical.value = !expandedHistorical.value }
-          }, expandedHistorical.value ? `Collapse ▲` : `Expand All ${props.result.historicalFacts.length} items ▼`)
+          }, expandedHistorical.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.historicalFacts.length }))
         ]),
         
         // Entities Tab
         activeTab.value === 'entities' && h('div', { class: 'entities-panel' }, [
           h('div', { class: 'panel-header' }, [
-            h('span', { class: 'panel-title' }, 'Involved Entities'),
-            h('span', { class: 'panel-count' }, `Total ${props.result.entities.length} items`)
+            h('span', { class: 'panel-title' }, t('step4.involvedEntities', { count: props.result.entities.length })),
+            h('span', { class: 'panel-count' }, t('step4.totalItems', { count: props.result.entities.length }))
           ]),
           props.result.entities.length > 0 ? h('div', { class: 'entities-grid' },
-            (expandedEntities.value ? props.result.entities : props.result.entities.slice(0, 8)).map((entity, i) => 
+            (expandedEntities.value ? props.result.entities : props.result.entities.slice(0, 8)).map((entity, i) =>
               h('div', { class: 'entity-tag', key: i }, [
                 h('span', { class: 'entity-name' }, entity.name),
                 entity.type && h('span', { class: 'entity-type' }, entity.type)
               ])
             )
-          ) : h('div', { class: 'empty-state' }, 'No involved entities'),
+          ) : h('div', { class: 'empty-state' }, t('step4.noInvolvedEntities')),
           props.result.entities.length > 8 && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedEntities.value = !expandedEntities.value }
-          }, expandedEntities.value ? `Collapse ▲` : `Expand All ${props.result.entities.length} items ▼`)
+          }, expandedEntities.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.entities.length }))
         ])
       ])
     ])
@@ -1657,7 +1660,7 @@ const QuickSearchDisplay = {
           props.result.facts.length > INITIAL_SHOW_COUNT && h('button', {
             class: 'expand-btn',
             onClick: () => { expandedFacts.value = !expandedFacts.value }
-          }, expandedFacts.value ? `Collapse ▲` : `Expand All ${props.result.facts.length} items ▼`)
+          }, expandedFacts.value ? t('step4.collapse') : t('step4.expandAll', { count: props.result.facts.length }))
         ]),
         
         // Edges Tab

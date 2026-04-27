@@ -7,7 +7,7 @@
       <!-- Center step indicator -->
       <div class="nav-center">
         <div class="step-badge">STEP 01</div>
-        <div class="step-name">Graph Build</div>
+        <div class="step-name">{{ $t('process.buildProcess') }}</div>
       </div>
 
       <div class="nav-status">
@@ -23,20 +23,20 @@
         <div class="panel-header">
           <div class="header-left">
             <span class="header-deco">◆</span>
-            <span class="header-title">Live Knowledge Graph</span>
+            <span class="header-title">{{ $t('process.liveKnowledgeGraph') }}</span>
           </div>
           <div class="header-right">
             <template v-if="graphData">
-              <span class="stat-item">{{ graphData.node_count || graphData.nodes?.length || 0 }} Nodes</span>
+              <span class="stat-item">{{ graphData.node_count || graphData.nodes?.length || 0 }} {{ $t('process.nodes') }}</span>
               <span class="stat-divider">|</span>
-              <span class="stat-item">{{ graphData.edge_count || graphData.edges?.length || 0 }} Edges</span>
+              <span class="stat-item">{{ graphData.edge_count || graphData.edges?.length || 0 }} {{ $t('process.edges') }}</span>
               <span class="stat-divider">|</span>
             </template>
             <div class="action-buttons">
-                <button class="action-btn" @click="refreshGraph" :disabled="graphLoading" title="Refresh Graph">
+                <button class="action-btn" @click="refreshGraph" :disabled="graphLoading" :title="$t('process.refreshGraph')">
                   <span class="icon-refresh" :class="{ 'spinning': graphLoading }">↻</span>
                 </button>
-                <button class="action-btn" @click="toggleFullScreen" :title="isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'">
+                <button class="action-btn" @click="toggleFullScreen" :title="isFullScreen ? $t('process.exitFullscreen') : $t('process.fullscreen')">
                   <span class="icon-fullscreen">{{ isFullScreen ? '↙' : '↗' }}</span>
                 </button>
             </div>
@@ -50,13 +50,13 @@
             <!-- Building in progress hint -->
             <div v-if="currentPhase === 1" class="graph-building-hint">
               <span class="building-dot"></span>
-              Real-time update in progress...
+              {{ $t('process.realtimeUpdate') }}
             </div>
             
             <!-- Node/Edge detail panel -->
             <div v-if="selectedItem" class="detail-panel">
               <div class="detail-panel-header">
-                <span class="detail-title">{{ selectedItem.type === 'node' ? 'Node Details' : 'Relationship' }}</span>
+                <span class="detail-title">{{ selectedItem.type === 'node' ? $t('process.nodeDetails') : $t('process.relationship') }}</span>
                 <span v-if="selectedItem.type === 'node'" class="detail-badge" :style="{ background: selectedItem.color }">
                   {{ selectedItem.entityType }}
                 </span>
@@ -66,21 +66,21 @@
               <!-- Node details -->
               <div v-if="selectedItem.type === 'node'" class="detail-content">
                 <div class="detail-row">
-                  <span class="detail-label">Name:</span>
+                  <span class="detail-label">{{ $t('process.name') }}</span>
                   <span class="detail-value highlight">{{ selectedItem.data.name }}</span>
                 </div>
                 <div class="detail-row">
-                  <span class="detail-label">UUID:</span>
+                  <span class="detail-label">{{ $t('process.uuid') }}</span>
                   <span class="detail-value uuid">{{ selectedItem.data.uuid }}</span>
                 </div>
                 <div class="detail-row" v-if="selectedItem.data.created_at">
-                  <span class="detail-label">Created:</span>
+                  <span class="detail-label">{{ $t('process.created') }}</span>
                   <span class="detail-value">{{ formatDate(selectedItem.data.created_at) }}</span>
                 </div>
                 
                 <!-- Properties / Attributes -->
                 <div class="detail-section" v-if="selectedItem.data.attributes && Object.keys(selectedItem.data.attributes).length > 0">
-                  <span class="detail-label">Properties:</span>
+                  <span class="detail-label">{{ $t('process.properties') }}</span>
                   <div class="properties-list">
                     <div v-for="(value, key) in selectedItem.data.attributes" :key="key" class="property-item">
                       <span class="property-key">{{ key }}:</span>
@@ -91,13 +91,13 @@
                 
                 <!-- Summary -->
                 <div class="detail-section" v-if="selectedItem.data.summary">
-                  <span class="detail-label">Summary:</span>
+                  <span class="detail-label">{{ $t('process.summary') }}</span>
                   <p class="detail-summary">{{ selectedItem.data.summary }}</p>
                 </div>
                 
                 <!-- Labels -->
                 <div class="detail-row" v-if="selectedItem.data.labels?.length">
-                  <span class="detail-label">Labels:</span>
+                  <span class="detail-label">{{ $t('process.labels') }}</span>
                   <div class="detail-labels">
                     <span v-for="label in selectedItem.data.labels" :key="label" class="label-tag">{{ label }}</span>
                   </div>
@@ -115,49 +115,49 @@
                   <span class="edge-target">{{ selectedItem.data.target_name || selectedItem.data.target_node_name }}</span>
                 </div>
                 
-                <div class="detail-subtitle">Relationship</div>
-                
+                <div class="detail-subtitle">{{ $t('process.relationship') }}</div>
+
                 <div class="detail-row">
-                  <span class="detail-label">UUID:</span>
+                  <span class="detail-label">{{ $t('process.uuid') }}</span>
                   <span class="detail-value uuid">{{ selectedItem.data.uuid }}</span>
                 </div>
                 <div class="detail-row">
-                  <span class="detail-label">Label:</span>
+                  <span class="detail-label">{{ $t('process.label') }}</span>
                   <span class="detail-value">{{ selectedItem.data.name || selectedItem.data.fact_type || 'RELATED_TO' }}</span>
                 </div>
                 <div class="detail-row" v-if="selectedItem.data.fact_type">
-                  <span class="detail-label">Type:</span>
+                  <span class="detail-label">{{ $t('process.type') }}</span>
                   <span class="detail-value">{{ selectedItem.data.fact_type }}</span>
                 </div>
                 
                 <!-- Fact -->
                 <div class="detail-section" v-if="selectedItem.data.fact">
-                  <span class="detail-label">Fact:</span>
+                  <span class="detail-label">{{ $t('process.fact') }}</span>
                   <p class="detail-summary">{{ selectedItem.data.fact }}</p>
                 </div>
                 
                 <!-- Episodes -->
                 <div class="detail-section" v-if="selectedItem.data.episodes?.length">
-                  <span class="detail-label">Episodes:</span>
+                  <span class="detail-label">{{ $t('process.episodes') }}</span>
                   <div class="episodes-list">
                     <span v-for="ep in selectedItem.data.episodes" :key="ep" class="episode-tag">{{ ep }}</span>
                   </div>
                 </div>
                 
                 <div class="detail-row" v-if="selectedItem.data.created_at">
-                  <span class="detail-label">Created:</span>
+                  <span class="detail-label">{{ $t('process.created') }}</span>
                   <span class="detail-value">{{ formatDate(selectedItem.data.created_at) }}</span>
                 </div>
                 <div class="detail-row" v-if="selectedItem.data.valid_at">
-                  <span class="detail-label">Valid From:</span>
+                  <span class="detail-label">{{ $t('process.validFrom') }}</span>
                   <span class="detail-value">{{ formatDate(selectedItem.data.valid_at) }}</span>
                 </div>
                 <div class="detail-row" v-if="selectedItem.data.invalid_at">
-                  <span class="detail-label">Invalid At:</span>
+                  <span class="detail-label">{{ $t('process.invalidAt') }}</span>
                   <span class="detail-value">{{ formatDate(selectedItem.data.invalid_at) }}</span>
                 </div>
                 <div class="detail-row" v-if="selectedItem.data.expired_at">
-                  <span class="detail-label">Expired At:</span>
+                  <span class="detail-label">{{ $t('process.expiredAt') }}</span>
                   <span class="detail-value">{{ formatDate(selectedItem.data.expired_at) }}</span>
                 </div>
               </div>
@@ -171,7 +171,7 @@
               <div class="loading-ring"></div>
               <div class="loading-ring"></div>
             </div>
-            <p class="loading-text">Loading graph data...</p>
+            <p class="loading-text">{{ $t('process.loadingGraphData') }}</p>
           </div>
           
           <!-- Waiting for build -->
@@ -189,8 +189,8 @@
                 <line x1="50" y1="72" x2="74" y2="66" stroke="#000" stroke-width="1"/>
               </svg>
             </div>
-            <p class="waiting-text">Waiting for ontology generation</p>
-            <p class="waiting-hint">Graph construction will start automatically after generation completes</p>
+            <p class="waiting-text">{{ $t('process.waitingOntology') }}</p>
+            <p class="waiting-hint">{{ $t('process.waitingOntologyHint') }}</p>
           </div>
           
           <!-- Building in progress without data -->
@@ -200,8 +200,8 @@
               <div class="loading-ring"></div>
               <div class="loading-ring"></div>
             </div>
-            <p class="waiting-text">Building graph</p>
-            <p class="waiting-hint">Data will be displayed soon...</p>
+            <p class="waiting-text">{{ $t('process.buildingGraph') }}</p>
+            <p class="waiting-hint">{{ $t('process.buildingGraphHint') }}</p>
           </div>
           
           <!-- Error state -->
@@ -225,7 +225,7 @@
       <div class="right-panel" :class="{ 'hidden': isFullScreen }">
         <div class="panel-header dark-header">
           <span class="header-icon">▣</span>
-          <span class="header-title">Build Process</span>
+          <span class="header-title">{{ $t('process.buildProcess') }}</span>
         </div>
 
         <div class="process-content">
@@ -234,7 +234,7 @@
             <div class="phase-header">
               <span class="phase-num">01</span>
               <div class="phase-info">
-                <div class="phase-title">Ontology Generation</div>
+                <div class="phase-title">{{ $t('process.ontologyGeneration') }}</div>
                 <div class="phase-api">/api/graph/ontology/generate</div>
               </div>
               <span class="phase-status" :class="getPhaseStatusClass(0)">
@@ -244,15 +244,12 @@
             
             <div class="phase-detail">
               <div class="detail-section">
-                <div class="detail-label">Description</div>
-                <div class="detail-content">
-                  After uploading documents, LLM analyzes the content and automatically generates an ontology structure suitable for knowledge graph simulation (entity types + relationship types)
-                </div>
+                <div class="detail-label">{{ $t('process.ontologyDesc') }}</div>
               </div>
               
               <!-- Ontology generation progress -->
               <div class="detail-section" v-if="ontologyProgress && currentPhase === 0">
-                <div class="detail-label">Generation Progress</div>
+                <div class="detail-label">{{ $t('process.generationProgress') }}</div>
                 <div class="ontology-progress">
                   <div class="progress-spinner"></div>
                   <span class="progress-text">{{ ontologyProgress.message }}</span>
@@ -261,7 +258,7 @@
               
               <!-- Generated ontology information -->
               <div class="detail-section" v-if="projectData?.ontology">
-                <div class="detail-label">Generated Entity Types ({{ projectData.ontology.entity_types?.length || 0 }})</div>
+                <div class="detail-label">{{ $t('process.generatedEntityTypes') }} ({{ projectData.ontology.entity_types?.length || 0 }})</div>
                 <div class="entity-tags">
                   <span 
                     v-for="entity in projectData.ontology.entity_types" 
@@ -274,7 +271,7 @@
               </div>
               
               <div class="detail-section" v-if="projectData?.ontology">
-                <div class="detail-label">Generated Relationship Types ({{ projectData.ontology.relation_types?.length || 0 }})</div>
+                <div class="detail-label">{{ $t('process.generatedRelationTypes') }} ({{ projectData.ontology.relation_types?.length || 0 }})</div>
                 <div class="relation-list">
                   <div 
                     v-for="(rel, idx) in projectData.ontology.relation_types?.slice(0, 5) || []" 
@@ -288,14 +285,14 @@
                     <span class="rel-target">{{ rel.target_type }}</span>
                   </div>
                   <div v-if="(projectData.ontology.relation_types?.length || 0) > 5" class="relation-more">
-                    +{{ projectData.ontology.relation_types.length - 5 }} more relationships...
+                    {{ $t('process.moreRelationships', { count: projectData.ontology.relation_types.length - 5 }) }}
                   </div>
                 </div>
               </div>
               
               <!-- Waiting state -->
               <div class="detail-section waiting-state" v-if="!projectData?.ontology && currentPhase === 0 && !ontologyProgress">
-                <div class="waiting-hint">Waiting for ontology generation...</div>
+                <div class="waiting-hint">{{ $t('process.waitingOntologyGeneration') }}</div>
               </div>
             </div>
           </div>
@@ -305,7 +302,7 @@
             <div class="phase-header">
               <span class="phase-num">02</span>
               <div class="phase-info">
-                <div class="phase-title">Graph Build</div>
+                <div class="phase-title">{{ $t('process.graphBuild') }}</div>
                 <div class="phase-api">/api/graph/build</div>
               </div>
               <span class="phase-status" :class="getPhaseStatusClass(1)">
@@ -315,20 +312,17 @@
             
             <div class="phase-detail">
               <div class="detail-section">
-                <div class="detail-label">Description</div>
-                <div class="detail-content">
-                  Based on the generated ontology, the documents are chunked and the Neo4j API is called to build the knowledge graph, extracting entities and relationships
-                </div>
+                <div class="detail-label">{{ $t('process.graphBuildDesc') }}</div>
               </div>
               
               <!-- Waiting for ontology completion -->
               <div class="detail-section waiting-state" v-if="currentPhase < 1">
-                <div class="waiting-hint">Waiting for ontology generation to complete...</div>
+                <div class="waiting-hint">{{ $t('process.waitingOntologyComplete') }}</div>
               </div>
               
               <!-- Build progress -->
               <div class="detail-section" v-if="buildProgress && currentPhase >= 1">
-                <div class="detail-label">Build Progress</div>
+                <div class="detail-label">{{ $t('process.buildProgress') }}</div>
                 <div class="progress-bar">
                   <div class="progress-fill" :style="{ width: buildProgress.progress + '%' }"></div>
                 </div>
@@ -339,19 +333,19 @@
               </div>
               
               <div class="detail-section" v-if="graphData">
-                <div class="detail-label">Build Result</div>
+                <div class="detail-label">{{ $t('process.buildResult') }}</div>
                 <div class="build-result">
                   <div class="result-item">
                     <span class="result-value">{{ graphData.node_count }}</span>
-                    <span class="result-label">Entity Nodes</span>
+                    <span class="result-label">{{ $t('process.entityNodes') }}</span>
                   </div>
                   <div class="result-item">
                     <span class="result-value">{{ graphData.edge_count }}</span>
-                    <span class="result-label">Relationship Edges</span>
+                    <span class="result-label">{{ $t('process.relationshipEdges') }}</span>
                   </div>
                   <div class="result-item">
                     <span class="result-value">{{ entityTypes.length }}</span>
-                    <span class="result-label">Entity Types</span>
+                    <span class="result-label">{{ $t('process.entityTypes') }}</span>
                   </div>
                 </div>
               </div>
@@ -363,8 +357,8 @@
             <div class="phase-header">
               <span class="phase-num">03</span>
               <div class="phase-info">
-                <div class="phase-title">Build Complete</div>
-                <div class="phase-api">Ready for next step</div>
+                <div class="phase-title">{{ $t('process.buildComplete') }}</div>
+                <div class="phase-api">{{ $t('process.readyForNextStep') }}</div>
               </div>
               <span class="phase-status" :class="getPhaseStatusClass(2)">
                 {{ getPhaseStatusText(2) }}
@@ -375,7 +369,7 @@
           <!-- Next step button -->
           <div class="next-step-section" v-if="currentPhase >= 2">
             <button class="next-step-btn" @click="goToNextStep" :disabled="currentPhase < 2">
-              Enter Environment Setup
+              {{ $t('process.enterEnvSetup') }}
               <span class="btn-arrow">→</span>
             </button>
           </div>
@@ -385,23 +379,23 @@
         <div class="project-panel">
           <div class="project-header">
             <span class="project-icon">◇</span>
-            <span class="project-title">Project Information</span>
+            <span class="project-title">{{ $t('process.projectInformation') }}</span>
           </div>
           <div class="project-details" v-if="projectData">
             <div class="project-item">
-              <span class="item-label">Project Name</span>
+              <span class="item-label">{{ $t('process.projectName') }}</span>
               <span class="item-value">{{ projectData.name }}</span>
             </div>
             <div class="project-item">
-              <span class="item-label">Project ID</span>
+              <span class="item-label">{{ $t('process.projectId') }}</span>
               <span class="item-value code">{{ projectData.project_id }}</span>
             </div>
             <div class="project-item" v-if="projectData.graph_id">
-              <span class="item-label">Graph ID</span>
+              <span class="item-label">{{ $t('process.graphId') }}</span>
               <span class="item-value code">{{ projectData.graph_id }}</span>
             </div>
             <div class="project-item">
-              <span class="item-label">Simulation Requirement</span>
+              <span class="item-label">{{ $t('process.simulationRequirement') }}</span>
               <span class="item-value">{{ projectData.simulation_requirement || '-' }}</span>
             </div>
           </div>
@@ -413,6 +407,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { generateOntology, getProject, buildGraph, getTaskStatus, getGraphData } from '../api/graph'
 import { getPendingUpload, clearPendingUpload } from '../store/pendingUpload'
@@ -420,6 +415,7 @@ import * as d3 from 'd3'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // Current project ID (may change from 'new' to actual ID)
 const currentProjectId = ref(route.params.projectId)
@@ -451,11 +447,11 @@ const statusClass = computed(() => {
 })
 
 const statusText = computed(() => {
-  if (error.value) return 'Build Failed'
-  if (currentPhase.value >= 2) return 'Build Complete'
-  if (currentPhase.value === 1) return 'Building Graph'
-  if (currentPhase.value === 0) return 'Generating Ontology'
-  return 'Initializing'
+  if (error.value) return t('process.statusBuildFailed')
+  if (currentPhase.value >= 2) return t('process.statusBuildComplete')
+  if (currentPhase.value === 1) return t('process.statusBuildingGraph')
+  if (currentPhase.value === 0) return t('process.statusGeneratingOntology')
+  return t('process.statusInitializing')
 })
 
 const entityTypes = computed(() => {
@@ -540,14 +536,14 @@ const getPhaseStatusClass = (phase) => {
 }
 
 const getPhaseStatusText = (phase) => {
-  if (currentPhase.value > phase) return 'Completed'
+  if (currentPhase.value > phase) return t('common.completed')
   if (currentPhase.value === phase) {
     if (phase === 1 && buildProgress.value) {
       return `${buildProgress.value.progress}%`
     }
-    return 'In Progress'
+    return t('common.inProgress')
   }
-  return 'Waiting'
+  return t('common.waiting')
 }
 
 // Initialize - handle new or existing project
@@ -569,7 +565,7 @@ const handleNewProject = async () => {
   const pending = getPendingUpload()
 
   if (!pending.isPending || pending.files.length === 0) {
-    error.value = 'No files pending upload. Please go back to home and try again.'
+    error.value = t('process.noFilesPending')
     loading.value = false
     return
   }
@@ -645,11 +641,11 @@ const loadProject = async () => {
         await loadGraph(response.data.graph_id)
       }
     } else {
-      error.value = response.error || 'Failed to load project'
+      error.value = response.error || t('process.failedToLoadProject')
     }
   } catch (err) {
     console.error('Load project error:', err)
-    error.value = 'Failed to load project: ' + (err.message || 'Unknown error')
+    error.value = t('process.failedToLoadProject') + ': ' + (err.message || '')
   } finally {
     loading.value = false
   }
@@ -668,7 +664,7 @@ const updatePhaseByStatus = (status) => {
       currentPhase.value = 2
       break
     case 'failed':
-      error.value = projectData.value?.error || 'Processing failed'
+      error.value = projectData.value?.error || t('process.processingFailed')
       break
   }
 }
@@ -680,7 +676,7 @@ const startBuildGraph = async () => {
     // Initialize progress
     buildProgress.value = {
       progress: 0,
-      message: 'Starting graph build...'
+      message: t('process.startingGraphBuild')
     }
 
     const response = await buildGraph({ project_id: currentProjectId.value })
@@ -697,12 +693,12 @@ const startBuildGraph = async () => {
       // Start task status polling
       startPollingTask(taskId)
     } else {
-      error.value = response.error || 'Failed to start graph build'
+      error.value = response.error || t('process.failedToStartBuild')
       buildProgress.value = null
     }
   } catch (err) {
     console.error('Build graph error:', err)
-    error.value = 'Failed to start graph build: ' + (err.message || 'Unknown error')
+    error.value = t('process.failedToStartBuild') + ': ' + (err.message || '')
     buildProgress.value = null
   }
 }
@@ -806,7 +802,7 @@ const pollTaskStatus = async (taskId) => {
         // Update progress display to complete status
         buildProgress.value = {
           progress: 100,
-          message: 'Build complete, loading graph...'
+          message: t('process.buildCompleteLoading')
         }
 
         // Reload project data to get graph_id
@@ -827,7 +823,7 @@ const pollTaskStatus = async (taskId) => {
       } else if (task.status === 'failed') {
         stopPolling()
         stopGraphPolling()
-        error.value = 'Graph build failed: ' + (task.error || 'Unknown error')
+        error.value = t('process.graphBuildFailed') + ' ' + (task.error || '')
         buildProgress.value = null
       }
     }
@@ -905,7 +901,7 @@ const renderGraph = () => {
       .attr('y', height / 2)
       .attr('text-anchor', 'middle')
       .attr('fill', '#999')
-      .text('Waiting for graph data...')
+      .text(t('process.waitingGraphData'))
     return
   }
 

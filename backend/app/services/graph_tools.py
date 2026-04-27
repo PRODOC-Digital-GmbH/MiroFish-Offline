@@ -14,6 +14,7 @@ import json
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
+from ..config import Config
 from ..utils.logger import get_logger
 from ..utils.llm_client import LLMClient
 from ..storage import GraphStorage
@@ -1414,7 +1415,7 @@ Please select up to {max_agents} most suitable Agents for interview and explain 
 
         agent_roles = [a.get("profession", "Unknown") for a in selected_agents]
 
-        system_prompt = """You are a professional journalist/interviewer. Based on the interview requirements, generate 3-5 deep interview questions.
+        system_prompt = f"""You are a professional journalist/interviewer. Based on the interview requirements, generate 3-5 deep interview questions.
 
 Question Requirements:
 1. Open-ended questions that encourage detailed answers
@@ -1424,7 +1425,9 @@ Question Requirements:
 5. Keep each question under 50 characters, concise and clear
 6. Ask directly, do not include background explanation or prefix
 
-Return JSON format: {"questions": ["question1", "question2", ...]}"""
+Return JSON format: {{"questions": ["question1", "question2", ...]}}
+
+ALL output MUST be in {Config.OUTPUT_LANGUAGE} only."""
 
         user_prompt = f"""Interview Requirement: {interview_requirement}
 
@@ -1467,7 +1470,7 @@ Please generate 3-5 interview questions."""
         for interview in interviews:
             interview_texts.append(f"[{interview.agent_name} ({interview.agent_role})]\n{interview.response[:500]}")
 
-        system_prompt = """You are a professional news editor. Please generate an interview summary based on the responses from multiple interviewees.
+        system_prompt = f"""You are a professional news editor. Please generate an interview summary based on the responses from multiple interviewees.
 
 Summary Requirements:
 1. Extract main viewpoints from all parties
@@ -1481,7 +1484,9 @@ Format Constraints (Must Follow):
 - Do not use Markdown headings (e.g., #, ##, ###)
 - Do not use dividers (e.g., ---, ***)
 - Use appropriate quotes when citing interviewees
-- Can use **bold** to mark keywords, but do not use other Markdown syntax"""
+- Can use **bold** to mark keywords, but do not use other Markdown syntax
+
+ALL output MUST be in {Config.OUTPUT_LANGUAGE} only."""
 
         user_prompt = f"""Interview Topic: {interview_requirement}
 

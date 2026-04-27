@@ -3,27 +3,27 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-left">
-        <div class="brand" @click="router.push('/')">SIMULAB</div>
+        <div class="brand" @click="router.push('/')">{{ $t('common.brand') }}</div>
       </div>
-      
+
       <div class="header-center">
         <div class="view-switcher">
-          <button 
-            v-for="mode in ['graph', 'split', 'workbench']" 
+          <button
+            v-for="mode in ['graph', 'split', 'workbench']"
             :key="mode"
             class="switch-btn"
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: 'Graph', split: 'Split', workbench: 'Workbench' }[mode] }}
+            {{ $t('common.' + mode) }}
           </button>
         </div>
       </div>
 
       <div class="header-right">
         <div class="workflow-step">
-          <span class="step-num">Step 2/5</span>
-          <span class="step-name">Env Setup</span>
+          <span class="step-num">{{ $t('main.stepFormat', { current: 2 }) }}</span>
+          <span class="step-name">{{ $t('main.stepEnvSetup') }}</span>
         </div>
         <div class="step-divider"></div>
         <span class="status-indicator" :class="statusClass">
@@ -66,6 +66,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import GraphPanel from '../components/GraphPanel.vue'
 import Step2EnvSetup from '../components/Step2EnvSetup.vue'
 import { getProject, getGraphData } from '../api/graph'
@@ -73,6 +74,7 @@ import { getSimulation, stopSimulation, getEnvStatus, closeSimulationEnv } from 
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // Props
 const props = defineProps({
@@ -109,9 +111,9 @@ const statusClass = computed(() => {
 })
 
 const statusText = computed(() => {
-  if (currentStatus.value === 'error') return 'Error'
-  if (currentStatus.value === 'completed') return 'Ready'
-  return 'Preparing'
+  if (currentStatus.value === 'error') return t('common.error')
+  if (currentStatus.value === 'completed') return t('common.ready')
+  return t('views.simulationView.preparing')
 })
 
 // --- Helpers ---

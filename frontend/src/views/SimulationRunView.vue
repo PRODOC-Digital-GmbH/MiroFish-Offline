@@ -3,27 +3,27 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-left">
-        <div class="brand" @click="router.push('/')">SIMULAB</div>
+        <div class="brand" @click="router.push('/')">{{ $t('common.brand') }}</div>
       </div>
-      
+
       <div class="header-center">
         <div class="view-switcher">
-          <button 
-            v-for="mode in ['graph', 'split', 'workbench']" 
+          <button
+            v-for="mode in ['graph', 'split', 'workbench']"
             :key="mode"
             class="switch-btn"
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: 'Graph', split: 'Split', workbench: 'Workbench' }[mode] }}
+            {{ $t('common.' + mode) }}
           </button>
         </div>
       </div>
 
       <div class="header-right">
         <div class="workflow-step">
-          <span class="step-num">Step 3/5</span>
-          <span class="step-name">Simulation</span>
+          <span class="step-num">{{ $t('main.stepFormat', { current: 3 }) }}</span>
+          <span class="step-name">{{ $t('main.stepSimulation') }}</span>
         </div>
         <div class="step-divider"></div>
         <span class="status-indicator" :class="statusClass">
@@ -69,6 +69,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import GraphPanel from '../components/GraphPanel.vue'
 import Step3Simulation from '../components/Step3Simulation.vue'
 import { getProject, getGraphData } from '../api/graph'
@@ -76,6 +77,7 @@ import { getSimulation, getSimulationConfig, stopSimulation, closeSimulationEnv,
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // Props
 const props = defineProps({
@@ -115,9 +117,9 @@ const statusClass = computed(() => {
 })
 
 const statusText = computed(() => {
-  if (currentStatus.value === 'error') return 'Error'
-  if (currentStatus.value === 'completed') return 'Completed'
-  return 'Running'
+  if (currentStatus.value === 'error') return t('common.error')
+  if (currentStatus.value === 'completed') return t('common.completed')
+  return t('views.simulationRunView.running')
 })
 
 const isSimulating = computed(() => currentStatus.value === 'processing')
